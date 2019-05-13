@@ -12,9 +12,16 @@ namespace Jogo
 {
     public partial class Form1 : Form
     {
+        private Jogo jogo;
+
         public Form1()
         {
             InitializeComponent();
+            jogo = Jogo.Instance;
+
+            // Teste da classe de jogo
+            jogo.MudarPerguntas();
+            label1.Text = jogo.questaoAtual.enunciado;
         }
     }
 }
