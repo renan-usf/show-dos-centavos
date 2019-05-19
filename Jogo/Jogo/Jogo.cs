@@ -109,7 +109,6 @@ namespace Jogo
         /// Representa a quantidade de questões respondidas pelo jogador até o momento.
         /// </summary>
         public int questoesRespondidas;
-
         /// <summary>
         /// Representa o nivel atual do jogador (1 a 16)
         /// </summary>
