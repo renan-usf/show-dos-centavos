@@ -20,43 +20,8 @@ namespace Jogo
         {
             InitializeComponent();
             jogo = Jogo.Instance;
-            // Teste da classe de jogo
-            jogo.MudarPerguntas();
-            lblEnunciado.Text = jogo.questaoAtual.enunciado;
-            
-            mudar = rand.Next(0,4);
-           // MessageBox.Show(Convert.ToString(mudar));
-            switch (mudar)
-            {
-                case 0:
-                    lblResposta1.Text = jogo.questaoAtual.alternativa_v;
-                    lblResposta2.Text = jogo.questaoAtual.alternativa_f1;
-                    lblResposta3.Text = jogo.questaoAtual.alternativa_f3;
-                    lblResposta4.Text = jogo.questaoAtual.alternativa_f2;
-                    break;
-                case 1:
-                    lblResposta1.Text = jogo.questaoAtual.alternativa_f2;
-                    lblResposta2.Text = jogo.questaoAtual.alternativa_v;
-                    lblResposta3.Text = jogo.questaoAtual.alternativa_f3;
-                    lblResposta4.Text = jogo.questaoAtual.alternativa_f1;
-                    break;
-                case 2:
-                    lblResposta1.Text = jogo.questaoAtual.alternativa_f3;
-                    lblResposta2.Text = jogo.questaoAtual.alternativa_f2;
-                    lblResposta3.Text = jogo.questaoAtual.alternativa_v;
-                    lblResposta4.Text = jogo.questaoAtual.alternativa_f1;
-                    break;
-                case 3:
-                    lblResposta1.Text = jogo.questaoAtual.alternativa_f3;
-                    lblResposta2.Text = jogo.questaoAtual.alternativa_f1;
-                    lblResposta3.Text = jogo.questaoAtual.alternativa_f2;
-                    lblResposta4.Text = jogo.questaoAtual.alternativa_v;
-                    break;
-                case 4:
-                default:
-                    break;
-            }
 
+            atualizarQuestoes();
         }
 
         private void btnContinuar_Click(object sender, EventArgs e)
@@ -102,8 +67,8 @@ namespace Jogo
             else
                 MessageBox.Show("Errou!");
 
-           // MessageBox.Show("Você possui " + Convert.ToString(jogo.questoesRespondidas) + " acertos!");
-           
+            // MessageBox.Show("Você possui " + Convert.ToString(jogo.questoesRespondidas) + " acertos!");
+            atualizarQuestoes();
 
             checkBox1.Checked = false;
             checkBox2.Checked = false;
@@ -128,6 +93,45 @@ namespace Jogo
         }
         private void lblResposta1_Click(object sender, EventArgs e)
         {
+
+        }
+
+        private void atualizarQuestoes()
+        {
+            jogo.MudarPerguntas();
+            lblEnunciado.Text = jogo.questaoAtual.enunciado;
+            mudar = rand.Next(0, 4);
+            // MessageBox.Show(Convert.ToString(mudar));
+            switch (mudar)
+            {
+                case 0:
+                    lblResposta1.Text = jogo.questaoAtual.alternativa_v;
+                    lblResposta2.Text = jogo.questaoAtual.alternativa_f1;
+                    lblResposta3.Text = jogo.questaoAtual.alternativa_f3;
+                    lblResposta4.Text = jogo.questaoAtual.alternativa_f2;
+                    break;
+                case 1:
+                    lblResposta1.Text = jogo.questaoAtual.alternativa_f2;
+                    lblResposta2.Text = jogo.questaoAtual.alternativa_v;
+                    lblResposta3.Text = jogo.questaoAtual.alternativa_f3;
+                    lblResposta4.Text = jogo.questaoAtual.alternativa_f1;
+                    break;
+                case 2:
+                    lblResposta1.Text = jogo.questaoAtual.alternativa_f3;
+                    lblResposta2.Text = jogo.questaoAtual.alternativa_f2;
+                    lblResposta3.Text = jogo.questaoAtual.alternativa_v;
+                    lblResposta4.Text = jogo.questaoAtual.alternativa_f1;
+                    break;
+                case 3:
+                    lblResposta1.Text = jogo.questaoAtual.alternativa_f3;
+                    lblResposta2.Text = jogo.questaoAtual.alternativa_f1;
+                    lblResposta3.Text = jogo.questaoAtual.alternativa_f2;
+                    lblResposta4.Text = jogo.questaoAtual.alternativa_v;
+                    break;
+                case 4:
+                default:
+                    break;
+            }
 
         }
     }

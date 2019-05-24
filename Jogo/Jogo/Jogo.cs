@@ -170,15 +170,15 @@ namespace Jogo
         /// <returns>Representacao em letra do nivel atual, usado para filtro da busca no SQL</returns>
         private string getNivel(int nivelInt)
         {
-            if (nivelInt >= 1 && nivelInt <= 5)
+            if (nivelInt == 1)
             {
                 return "A";
             }
-            else if (nivelInt >= 6 && nivelInt <= 10)
+            else if (nivelInt == 2)
             {
                 return "B";
             }
-            else if (nivelInt >= 11 && nivelInt <= 15)
+            else if (nivelInt == 3)
             {
                 return "C";
             }
@@ -270,9 +270,26 @@ namespace Jogo
                 listaPerguntas = questoesNivelD;
             }
 
-            int randomIndex = r.Next(listaPerguntas.Count);
-            questaoAtual = listaPerguntas[randomIndex];
-            listaPerguntas.RemoveAt(randomIndex);
+            if (listaPerguntas.Count() == 0)
+            {
+                if (nivelAtual == 4)
+                {
+                    MessageBox.Show("Parabés você é muito bom e respondeu todas as perguntas!!");
+                    Application.Exit();
+                }
+                else
+                {
+                    nivelAtual += 1;
+                    MudarPerguntas();
+                    return;
+                }
+            }
+            else
+            {
+                int randomIndex = r.Next(listaPerguntas.Count);
+                questaoAtual = listaPerguntas[randomIndex];
+                listaPerguntas.RemoveAt(randomIndex);
+            }
         }
 
     }
