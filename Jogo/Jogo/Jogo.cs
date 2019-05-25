@@ -1,51 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
 
 namespace Jogo
 {
-    public struct Perguntas
-    {
-        public int id_pergunta;
-        public string enunciado;
-        public string alternativa_v;
-        public string alternativa_f1;
-        public string alternativa_f2;
-        public string alternativa_f3;
-        public int resposta;
-        public string nivel;
-
-        public string respostaCorreta
-        {
-            get
-            {
-                if (resposta == 1)
-                {
-                    return alternativa_v;
-                }
-                else if (resposta == 2)
-                {
-                    return alternativa_f1;
-                }
-                else if (resposta == 3)
-                {
-                    return alternativa_f2;
-                }
-                else
-                {
-                    return alternativa_f3;
-                }
-            }
-        }
-    }
-
-    class Jogo
+    public class Jogo
     {
         private static Jogo instance;
+        private Form formPergunta;
 
         public static Jogo Instance
         {
@@ -59,126 +21,61 @@ namespace Jogo
             }
         }
 
-        private Jogo()
-        {
-            valores = new List<Tuple<int, int>>();
-
-            valores.Add(Tuple.Create(1, 1000));
-            valores.Add(Tuple.Create(2, 2000));
-            valores.Add(Tuple.Create(3, 3000));
-            valores.Add(Tuple.Create(4, 4000));
-            valores.Add(Tuple.Create(5, 5000));
-            valores.Add(Tuple.Create(6, 10000));
-            valores.Add(Tuple.Create(7, 20000));
-            valores.Add(Tuple.Create(8, 30000));
-            valores.Add(Tuple.Create(9, 40000));
-            valores.Add(Tuple.Create(10, 50000));
-            valores.Add(Tuple.Create(11, 100000));
-            valores.Add(Tuple.Create(12, 200000));
-            valores.Add(Tuple.Create(13, 300000));
-            valores.Add(Tuple.Create(14, 400000));
-            valores.Add(Tuple.Create(15, 500000));
-            valores.Add(Tuple.Create(16, 1000000));
-
-            valorAtual = 0;
-            nivelAtual = 1;
-            contaPulo = 3;
-
-            questoesNivelA = new List<Perguntas>();
-            questoesNivelB = new List<Perguntas>();
-            questoesNivelC = new List<Perguntas>();
-            questoesNivelD = new List<Perguntas>();
-
-            popularPerguntas();
-
-            inicializado = false;
-            errouPergunta = false;
-        }
-
-        /// <summary>
-        /// Tabela de valores
-        /// </summary>
-        public List<Tuple<int, int>> valores;
-
         /// <summary>
         /// Representa a quantidade de dinheiro acumulada pelo jogador até o momento
         /// </summary>
         public int valorAtual;
 
         /// <summary>
-        /// Representa a quantidade de questões respondidas pelo jogador até o momento.
-        /// </summary>
-        public int questoesRespondidas;
-        /// <summary>
-        /// Representa o nivel atual do jogador (1 a 16)
+        /// Representa o nível do jogo em que o jogador está no momento (de 0 a 3)
         /// </summary>
         public int nivelAtual;
 
         /// <summary>
-        /// Indica se o jogo foi inicializado. Usado pelo construtor da tela principal, para carregar primeira pergunta
+        /// Representa a quantidade de questões respondidas pelo jogador até o momento.
         /// </summary>
-        public bool inicializado;
+        public int questoesRespondidas;
 
         /// <summary>
-        /// Indica se usuario errou pergunta. Usado pela tela final para exibir ou nao a resposta correta
+        /// Representa quantidade de erros que usuario pode realizar
         /// </summary>
-        public bool errouPergunta;
+        public int contaErro;
 
         /// <summary>
-        /// Representa quantidade de pulos que usuario pode realizar
+        /// Todas as perguntas de um jogo.
         /// </summary>
-        public int contaPulo;
-
-        /// <summary>
-        /// Instancia de struct com a questao no momento.
-        /// </summary>
-        public Perguntas questaoAtual;
-
-        public List<Perguntas> questoesNivelA;
-        public List<Perguntas> questoesNivelB;
-        public List<Perguntas> questoesNivelC;
-        public List<Perguntas> questoesNivelD;
-
-        public int Premio
-        {
-            get
-            {
-                return valores[nivelAtual - 1].Item2; //-1 pq indices de lista tamanho 'n' vão de 0 até n-1
-            }
-        }
+        public PerguntasTupla perguntas;
 
         /// <summary>
         /// Inicia estado do jogo
         /// </summary>
-        public void iniciar()
+        public void iniciar(PerguntasTupla perguntas)
         {
+            this.perguntas = perguntas;
+
             valorAtual = 0;
-            nivelAtual = 1;
-            contaPulo = 3;
-            questoesNivelA.Clear();
-            questoesNivelB.Clear();
-            questoesNivelC.Clear();
-            questoesNivelD.Clear();
-            popularPerguntas();
-            inicializado = true;
+            nivelAtual = 0;
+            contaErro = 3;
+
+            inserirPergunta();
         }
 
         /// <summary>
         /// Usado para retornar letra do nivel (A, B, C, ou D)
         /// </summary>
-        /// <param name="nivelInt">Representa nivel atual em inteiros (1 a 16)</param>
+        /// <param name="nivelInt">Representa nivel atual em inteiros (0 a 3)</param>
         /// <returns>Representacao em letra do nivel atual, usado para filtro da busca no SQL</returns>
         private string getNivel(int nivelInt)
         {
-            if (nivelInt == 1)
+            if (nivelInt == 0)
             {
                 return "A";
             }
-            else if (nivelInt == 2)
+            else if (nivelInt == 1)
             {
                 return "B";
             }
-            else if (nivelInt == 3)
+            else if (nivelInt == 2)
             {
                 return "C";
             }
@@ -188,109 +85,63 @@ namespace Jogo
             }
         }
 
-        //Fazer o Form responsável para chamar esta função
-        private void popularPerguntas()//Função responsável para conexão com o banco de dados e polpular as perguntas
+        private List<Pergunta> getPerguntasNível()
         {
-            using (MySqlConnection conexao = new MySqlConnection("datasource=sql172.main-hosting.eu;port=3306;username=u727992112_cnp;password=telaazul404;database=u727992112_cnp"))
-            {
-                //@"Server =.\SQLEXPRESS;Database=NomeDoBanco;Integrated Security=True;User Instance=True"
-                //datasource = sql172.main - hosting.eu; port = 3306; username = u727992112_cnp; password = telaazul404; database = u727992112_cnp
-                try
-                {
-                    conexao.Open();
-                    string query = string.Format("SELECT * FROM perguntas");
-                    MySqlCommand sqlcommand = new MySqlCommand(query, conexao);
-                    //sqldatareader retorna somente os valores, o usuario requisita os dados e o sql retora os mesmos, isso torna mais rápido o acesso
-                    MySqlDataReader sqlreader = sqlcommand.ExecuteReader();
-                    if (sqlreader.HasRows)
-                    {
-                        while (sqlreader.Read())
-                        {
-
-                            Perguntas p = new Perguntas();
-                            p.id_pergunta = (int)sqlreader["id_pergunta"];
-                            p.enunciado = (string)sqlreader["enunciado"];
-                            p.alternativa_v = (string)sqlreader["alternativa_v"];
-                            p.alternativa_f1 = (string)sqlreader["alternativa_f1"];
-                            p.alternativa_f2 = (string)sqlreader["alternativa_f2"];
-                            p.alternativa_f3 = (string)sqlreader["alternativa_f3"];
-                            // p.resposta = (int)sqlreader["respostacorreta"];
-                            p.nivel = (string)sqlreader["tipo"];
-                            if (p.nivel == "A")
-                            {
-                                questoesNivelA.Add(p);
-                            }
-                            else if (p.nivel == "B")
-                            {
-                                questoesNivelB.Add(p);
-                            }
-                            else if (p.nivel == "C")
-                            {
-                                questoesNivelC.Add(p);
-                            }
-                            else
-                            {
-                                questoesNivelD.Add(p);
-                            }
-
-                        }
-                    }
-                    sqlreader.Close();
-
-                }
-                catch (Exception e)
-                {
-
-                    MessageBox.Show("Erro ao conectar com o banco de dados" + e.Message);
-                }
-
-            }
-        }
-
-        public void MudarPerguntas()
-        {
-            Random r = new Random();
             string nivelChar = getNivel(nivelAtual);
-            List<Perguntas> listaPerguntas = new List<Perguntas>();
 
             if (nivelChar == "A")
-            {
-                listaPerguntas = questoesNivelA;
-            }
+                return perguntas.nivelA;
             else if (nivelChar == "B")
-            {
-                listaPerguntas = questoesNivelB;
-            }
+                return perguntas.nivelB;
             else if (nivelChar == "C")
+                return perguntas.nivelC;
+            else
+                return perguntas.nivelD;
+        }
+
+        // Insere a próxima pergunta no jogo
+        private void inserirPergunta()
+        {
+            List<Pergunta> perguntasNivel = getPerguntasNível();
+
+            // Verifica se o jogador não subiu de nível
+            if (perguntasNivel.Count == 0 && nivelAtual != 4)
             {
-                listaPerguntas = questoesNivelC;
-            }
-            else if (nivelChar == "D")
-            {
-                listaPerguntas = questoesNivelD;
+                nivelAtual++;
+                perguntasNivel = getPerguntasNível();
             }
 
-            if (listaPerguntas.Count() == 0)
-            {
-                if (nivelAtual == 4)
-                {
-                    MessageBox.Show("Parabés você é muito bom e respondeu todas as perguntas!!");
-                    Application.Exit();
-                }
-                else
-                {
-                    nivelAtual += 1;
-                    MudarPerguntas();
-                    return;
-                }
-            }
-            else
-            {
-                int randomIndex = r.Next(listaPerguntas.Count);
-                questaoAtual = listaPerguntas[randomIndex];
-                listaPerguntas.RemoveAt(randomIndex);
+            if (nivelAtual == 4)
+                finalizar();
+            else {
+                Random r = new Random();
+                Pergunta perguntaEscolhida;
+
+                int randomIndex = r.Next(perguntasNivel.Count);
+                perguntaEscolhida = perguntasNivel[randomIndex];
+                perguntasNivel.RemoveAt(randomIndex);
+
+                formPergunta = new Form1(instance, perguntaEscolhida);
+                formPergunta.Show();
             }
         }
 
+        public void acertou()
+        {
+            MessageBox.Show("Parabéns você acertou =)");
+            inserirPergunta();
+        }
+
+        public void errou()
+        {
+            MessageBox.Show("Que pena você errou =(");
+            inserirPergunta();
+        }
+
+        private void finalizar()
+        {
+            MessageBox.Show("Acabaram todas as perguntas");
+            Application.Exit();
+        }
     }
 }
